@@ -1,9 +1,13 @@
+package uno;
+
+import uno.views.Visor;
+
 import java.util.LinkedList;
 import java.util.List;
 
 public class Juego {
     private Carta ultCarta;
-    private Carta selCarta;
+    private Carta cartaTirada;
     private Carta.Color ultColor;
     private List<Player> Jugadores;
     private Baraja miBaraja;
@@ -11,52 +15,64 @@ public class Juego {
     int turnoPlayer = 0;
     String sentido = "delante";
     public boolean jugar = true;
+    private Visor miVisor;
 
-    //ultCarta = new Carta();
-
-    // contructor de la clase juego
+    // *************** contructor de la clase juego ****************************
     public Juego() {
         miBaraja = new Baraja();
         this.miBaraja = miBaraja;
         Rechazadas = new LinkedList();
         this.Rechazadas = Rechazadas;
+}
 
-    }
-
-    public void run(List<Player> Jugadores) {
+  // *********************** MÉTODO PRINCIPAL JUEGO ****************************
+    public void run(List<Player> Jugadores, Visor miVisor) {
         this.Jugadores = Jugadores;
-        //    System.out.println(miBaraja.toString());
+        this.miVisor = miVisor;
         Player playerActual;
 
         reparteCartas();
-        Rechazadas.push(miBaraja.dameCarta());
-
+        while (true) {
+            Rechazadas.push(miBaraja.dameCarta());
+            ultCarta = Rechazadas.getFirst();
+            if (ultCarta.getTipo() != Carta.Tipo.CAMBIOCOLOR && ultCarta.getTipo() != Carta.Tipo.ROBA4 && ultCarta.getTipo() != Carta.Tipo.ROBA2) {
+                break;
+            }
+        }
+        // validar que no sea una carta especial
         playerActual = Jugadores.get(turnoPlayer);
+
         while (jugar) {
             ultCarta = Rechazadas.getFirst();
-            muestraUltimacarta();
+
             if (ultCarta.getTipo() != Carta.Tipo.CAMBIOCOLOR && ultCarta.getTipo() != Carta.Tipo.ROBA4){
                 ultColor = ultCarta.getColor();
+                miVisor.muestraPanelSuperior(playerActual.dameNombre(),ultCarta, ultColor,miBaraja.numeroCartas(),Jugadores.size());}
+            else{
+                // si es inicio del juego  y primera carta es cambio color ultcolor = null
+                miVisor.muestraPanelSuperior(playerActual.dameNombre(),ultCarta, ultColor,miBaraja.numeroCartas(),Jugadores.size());
             }
 
-            selCarta = playerActual.turnoAccion(ultCarta, ultColor);
-            if (selCarta == null ) {
+            cartaTirada = playerActual.tiraCarta(ultCarta, ultColor, miVisor);
+            if (cartaTirada == null ) {
+                if (miBaraja.numeroCartas() == 1){
+                   miBaraja.recargaBaraja(Rechazadas);
+                }
                 playerActual.cojerCarta(miBaraja.dameCarta());
-                // CONTEMPLAR FINAL DE BARAJA ---> METER LAS RECHAZADAS EXCEPTO LA ULTIMA
                 turnoPlayer = turnoSiguiente(sentido,turnoPlayer);
                 playerActual = Jugadores.get(turnoPlayer);
-                //  break;
             } else {
-                System.out.println("TIRADO CARTA: " + selCarta.toString());
-                if (validarCarta(selCarta, ultCarta, ultColor) == true) {
-                    Rechazadas.push(selCarta);  //System.out.println("CARTAS RECHAZADAS " + Rechazadas.toString());
-                    playerActual.eliminarCarta(selCarta);
+                if (validarCarta(cartaTirada, ultCarta, ultColor) == true) {
+                    Rechazadas.push(cartaTirada);  //System.out.println("CARTAS RECHAZADAS " + Rechazadas.toString());
+                    playerActual.eliminarCarta(cartaTirada);
 
-                    if (playerActual.isEmpty()){
+                    //****** SIN CARTAS JUGADOR HA GANADO **
+                    if (playerActual.sinCartas()){
+                        miVisor.ganador(playerActual.dameNombre());
                         break;};
 
                     //******* CAMBIO DIRECCIÓN ***********
-                    if (selCarta.getTipo() == Carta.Tipo.CAMBIOSENTIDO) {
+                    if (cartaTirada.getTipo() == Carta.Tipo.CAMBIOSENTIDO) {
                         if (sentido.equals("delante")) {
                             sentido = "atras";
                         } else {
@@ -66,25 +82,25 @@ public class Juego {
                     turnoPlayer = turnoSiguiente(sentido,turnoPlayer); //**** AVANZAMOS TURNO
 
                    //******* SALTA TURNO ****************
-                   if (selCarta.getTipo() == Carta.Tipo.SALTATURNO) {
+                   if (cartaTirada.getTipo() == Carta.Tipo.SALTATURNO) {
                        turnoPlayer = turnoSiguiente(sentido,turnoPlayer); // ya habiamos pasado 1 + 1 saltamos
                    }
                    //******* ROBA DOS (SIG. JUGADOR) ****
-                   if (selCarta.getTipo() == Carta.Tipo.ROBA2) {
+                   if (cartaTirada.getTipo() == Carta.Tipo.ROBA2) {
                        playerActual = Jugadores.get(turnoPlayer);
-                       playerActual.muestraCartas();
+                       playerActual.muestraCartas(miVisor);
                        playerActual.cojerCarta(miBaraja.dameCarta());
                        playerActual.cojerCarta(miBaraja.dameCarta());
                    }
                    //******* CAMBIO DE COLOR ************
-                   if (selCarta.getTipo() == Carta.Tipo.CAMBIOCOLOR) {
-                        ultColor = playerActual.pedirColor();
+                   if (cartaTirada.getTipo() == Carta.Tipo.CAMBIOCOLOR) {
+                        ultColor = playerActual.pedirColor(miVisor);
                    }
                    //******* ROBA 4 - CAMBIO COLOR ******
-                   if (selCarta.getTipo() == Carta.Tipo.ROBA4) {
-                       ultColor = playerActual.pedirColor();
+                   if (cartaTirada.getTipo() == Carta.Tipo.ROBA4) {
+                       ultColor = playerActual.pedirColor(miVisor);
                        playerActual = Jugadores.get(turnoPlayer);
-                       playerActual.muestraCartas();
+                       playerActual.muestraCartas(miVisor);
                        playerActual.cojerCarta(miBaraja.dameCarta());
                        playerActual.cojerCarta(miBaraja.dameCarta());
                        playerActual.cojerCarta(miBaraja.dameCarta());
@@ -97,6 +113,7 @@ public class Juego {
         }
     }
 
+// ****************** MÉTODOS AUXILIARES DE JUEGO *************************************
     public void reparteCartas() {
         Player playerActual;
         for (int i = 0; i < Jugadores.size(); i++) {
@@ -120,11 +137,7 @@ public class Juego {
     }
 
     public void muestraUltimacarta() {
-        if (ultCarta.getTipo() == Carta.Tipo.CAMBIOCOLOR || ultCarta.getTipo() == Carta.Tipo.ROBA4){
-            System.out.println("ULTIMA CARTA: " + ultCarta.toString()+" COLOR: "+ muestraColor());}
-         else{
-                System.out.println("ULTIMA CARTA: " + ultCarta.toString());
-            }
+        miVisor.muestraUltimaCarta(ultCarta, ultColor);
         }
 
     public Boolean validarCarta(Carta selCarta, Carta ultCarta, Carta.Color ultColor) {
@@ -142,22 +155,5 @@ public class Juego {
             }
         }
     }
-    public String muestraColor() {
-        String cadena = "";
-        String ANSI_RESET = "\u001B[0m";
-        String ANSI_RED = "\u001b[41;1m";    //"u001B[31m";
-        String ANSI_GREEN = "\u001b[42;1m"; //"u001B[32m";
-        String ANSI_YELLOW = "\u001b[43;1m";//""\u001B[33m";
-        String ANSI_BLUE = "\u001b[44;1m";  //""\u001B[34m";
-        String ANSI_BLACK = "\u001B[30m";
-
-        if (ultColor.equals(Carta.Color.BLUE)){ cadena = ANSI_BLUE + ANSI_BLACK + "AZUL" + ANSI_RESET;};
-        if (ultColor.equals(Carta.Color.RED)){ cadena = ANSI_RED + ANSI_BLACK + "ROJO" + ANSI_RESET;};
-        if (ultColor.equals(Carta.Color.GREEN)){ cadena = ANSI_GREEN + ANSI_BLACK + "VERDE" + ANSI_RESET;};
-        if (ultColor.equals(Carta.Color.YELLOW)){ cadena = ANSI_YELLOW + ANSI_BLACK + "AMARILLO" + ANSI_RESET;};
-        return cadena;
-
-        }
-
 
 }

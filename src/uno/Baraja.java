@@ -1,4 +1,7 @@
+package uno;
+
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Baraja {
     private ArrayList<Carta> barajaList;
@@ -18,6 +21,16 @@ public class Baraja {
         return barajaList.remove(rand);
     }
 
+    public void recargaBaraja(LinkedList<Carta> Rechazadas){
+        for (int i = 0; i < Rechazadas.size() -1; i++) {
+            barajaList.add(Rechazadas.remove(i));
+        }
+
+    }
+
+    public int numeroCartas(){
+        return barajaList.size();
+    }
     private void rellenaBaraja(){
         Carta.Color miscolores[] = Carta.Color.values();
         Integer mvalor = null;
@@ -72,9 +85,9 @@ public class Baraja {
     @Override
     public String toString() {
         if (barajaList.isEmpty()) {
-            return "Baraja vacia";
+            return "uno.Baraja vacia";
         } else {
-            return "Baraja Completa \n" +
+            return "uno.Baraja Completa \n" +
                       barajaList.toString() ;
         }
     }

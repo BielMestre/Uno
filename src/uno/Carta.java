@@ -1,3 +1,5 @@
+package uno;
+
 import java.util.Objects;
 
 public class Carta {
@@ -87,16 +89,16 @@ public class Carta {
         }
         switch (tipo) {
             case NORMAL:
-                cadena = cadena + ANSI_BLACK + " " + valor+" " + ANSI_RESET;
+                cadena = cadena + ANSI_BLACK + "  " + valor+"  " + ANSI_RESET;
                 break;
             case ROBA2:
-                cadena = cadena + ANSI_BLACK + " +2" + ANSI_RESET;
+                cadena = cadena + ANSI_BLACK + "  +2 " + ANSI_RESET;
                 break;
             case CAMBIOSENTIDO:
-                cadena = cadena + ANSI_BLACK +"<->" + ANSI_RESET;
+                cadena = cadena + ANSI_BLACK + " <-> " + ANSI_RESET;
                 break;
             case SALTATURNO:
-                cadena = cadena + ANSI_BLACK + " X " + ANSI_RESET;
+                cadena = cadena + ANSI_BLACK + "  X  " + ANSI_RESET;
                 break;
             case ROBA4:
                 cadena = cadena + ANSI_BLUE + " " +
@@ -110,7 +112,7 @@ public class Carta {
                                   ANSI_GREEN + " " +
                                   ANSI_RED + " " +
                                   ANSI_YELLOW + " " +
-                                  ANSI_RESET;
+                                  ANSI_RESET+" ";
                 break;
         }
 

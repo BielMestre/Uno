@@ -1,39 +1,43 @@
+package uno;
+
+import uno.views.Terminal;
+import uno.views.Visor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class Main {
 
 
     public static void main(String[] args) {
         boolean jugar = true;
-        System.out.println("BIENVENIDO AL UNO DE BIEL (que te sea leve..... :)" );
-        System.out.println("******* INSERT COIN ******" );
+        Visor miVisor = new Terminal();
+        miVisor.presentacion();
 
         // ------- CREAMOS LOS JUGADORES -----------
-        List<Player> Jugadores = creaJugadores();
+        List<Player> Jugadores = creaJugadores(miVisor);
         if  (!Jugadores.isEmpty()){
             // ------- LLAMAMOS A BUCLE DE JUEGO -------
             Juego miJuego = new Juego();
-            miJuego.run(Jugadores);
+            miJuego.run(Jugadores, miVisor);
         }
         // ------- FIN DEL JUEGO -------------------
-        System.out.println("******* GAME OVER ******");
+        miVisor.gameOver();
     }
 
-    public static List<Player> creaJugadores() {
+    public static List<Player> creaJugadores(Visor miVisor) {
         ArrayList<Player> Jugadores;
         Jugadores = new ArrayList<Player>();
+        int i= 1;
+        String nombre;
         while (true) {
-            Scanner dc = new Scanner(System.in);
-            System.out.println("Nombre del jugador (Intro Finalizar): ");
-            String nombre = dc.nextLine();
-            if (nombre.equals(""))
+            nombre = miVisor.pideNombreJugador(i);
+            if (nombre.equals("") || nombre.isEmpty())
                 break;
             else {
                 Jugadores.add(new Humano(nombre));
             }
+            i++;
         }
      return Jugadores;
     }
