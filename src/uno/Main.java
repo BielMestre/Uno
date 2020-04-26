@@ -1,5 +1,6 @@
 package uno;
 
+import uno.views.GUI;
 import uno.views.Terminal;
 import uno.views.Visor;
 
@@ -11,7 +12,8 @@ public class Main {
 
     public static void main(String[] args) {
         boolean jugar = true;
-        Visor miVisor = new Terminal();
+    //    Visor miVisor = new Terminal();
+        Visor miVisor = new GUI();
         miVisor.presentacion();
 
         // ------- CREAMOS LOS JUGADORES -----------
